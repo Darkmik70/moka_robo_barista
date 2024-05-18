@@ -24,7 +24,7 @@
     (at-grinder ?b) ;coffee is in grinder
 
     (at ?l ?o) ;?where ?what object is at location
-    ; (is-stove ?l) ;location which is identified as stove
+    (is-stove ?l) ;location which is identified as stove
 
 )
 
@@ -38,7 +38,7 @@
 (:action robot-put-pot-down
     ; put the pot down to the location
     :parameters (?r ?p ?l)
-    :precondition (and  (ROBOT ?r) (not (free ?r)) (POT ?p) (at-robot ?p) (LOCATION ?l) (not (at ?l ?p)))
+    :precondition (and  (ROBOT ?r) (not (free ?r)) (POT ?p) (at-robot ?p) (LOCATION ?l))
     :effect (and (free ?r) (not (at-robot ?p)) (at ?l ?p))
 )
 
@@ -80,7 +80,7 @@
 )
 
 (:action robot-take-coffee
-    ; robot takes coffee from the table, and opens it up
+    ; robot takes coffee from the location, and opens it up
     :parameters (?r ?b)
     :precondition (and  (ROBOT ?r) (free ?r) (BEANS ?b) (not (at-robot ?b)) )
     :effect (and (not (free ?r)) (at-robot ?b))
@@ -102,8 +102,14 @@
 (:action grind-coffee
     :parameters (?r ?b)
     :precondition (and  (ROBOT ?r) (free ?r) (BEANS ?b) (at-grinder ?b))
-    :effect (and (is-grinded ?b) (not (free ?r)) (not (at-grinder ?b)) (at-robot ?b))
+    :effect (and (is-grinded ?b))
 )
+
+; (:action grind-coffee
+;     :parameters (?r ?b)
+;     :precondition (and  (ROBOT ?r) (free ?r) (BEANS ?b) (at-grinder ?b))
+;     :effect (and (is-grinded ?b) (not (free ?r)) (not (at-grinder ?b)) (at-robot ?b))
+; )
 
 (:action take-coffee-from-grinder
     :parameters (?r ?b)
@@ -119,11 +125,13 @@
     :effect (and (has-coffee ?p) (not (at-robot ?b)) (free ?r))
 )
 
-(:action moka-make
+(:action ignite-heat
     ; put pot on the stove, fire it up, wait for coffee to be ready, and take it again
-    :parameters (?r ?p)
-    :precondition (and (ROBOT ?r) (not (free ?r))
-                       (POT ?p) (at-robot ?p) (is-screwed ?p) (has-water ?p) (has-coffee ?p))
+    :parameters (?r ?p ?l)
+    :precondition (and (ROBOT ?r) (free ?r)
+                       (POT ?p) (is-screwed ?p) (has-water ?p) (has-coffee ?p)
+                       (LOCATION ?l) (at ?l ?p) (is-stove ?l)
+                       )
     :effect (and (coffee-is-ready ?p))
 )
 

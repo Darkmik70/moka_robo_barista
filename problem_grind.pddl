@@ -3,14 +3,14 @@
     robert
     bialetti
     honduras
-    counter stove
+    counter
 )
 
 (:init
     (ROBOT robert)
     (POT bialetti)
     (BEANS honduras)
-    (LOCATION counter) (LOCATION stove)
+    (LOCATION counter) ;(LOCATION stove)
 
     (free robert)
     (is-screwed bialetti)
@@ -18,7 +18,9 @@
     
     (at counter bialetti)
 
-    (is-stove stove)
+    (is-grinded honduras) ; coffee is already grinded
+
+    ; (is-stove stove)
 )
 
 (:goal (and (beverage-is-served bialetti))
