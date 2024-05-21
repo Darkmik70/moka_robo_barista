@@ -37,6 +37,7 @@
     (is-screwed ?p)
     (has-filter ?p)
     (coffee-is-ready ?p)
+    (coffee-is-distributed-evenly ?p)
 
 )
 
@@ -161,7 +162,6 @@
                        )
     :effect (and (is-free ?h) (not (at ?h ?c)) (at ?l ?c))
 )
-
 
 
 (:action take-cup-up-from
@@ -334,11 +334,21 @@
     :effect (and (has-coffee ?p) (not (has-coffee ?c)) (is-empty ?c))
 )
 
+(:action distribute-coffee-evenly
+    :parameters (?h1 ?h2 ?p)
+    :precondition (and (HAND ?h1) (not (is-free ?h1))
+                       (HAND ?h2) (has-spoon ?h2)
+                       (POT ?p) (not (is-screwed ?p)) (has-filter ?p) (at ?h1 ?p) (has-coffee ?p)
+                       )
+    :effect (and (coffee-is-distributed-evenly ?p)  )
+)
+
+
 (:action ignite-heat
     :parameters (?h ?p ?l)
     :precondition (and (HAND ?h) (is-free ?h)
                        (LOCATION ?l) (is-stove ?l)
-                       (POT ?p) (has-water ?p) (has-coffee ?p) (is-screwed ?p) (at ?l ?p)
+                       (POT ?p) (has-water ?p) (coffee-is-distributed-evenly ?p) (is-screwed ?p) (at ?l ?p)
     )
     :effect (and (coffee-is-ready ?p))
 )
@@ -363,7 +373,5 @@
                        )
     :effect (and (has-flavor ?c ?a))
 )
-
-
 
 )

@@ -76,6 +76,7 @@
             (at drawer coffee_mug)
             (at drawer beans_jar)
             (at table water_jug)
+            (at table sugar)
             (is-closed drawer)
             (is-closed closet)
             
