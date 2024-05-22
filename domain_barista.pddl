@@ -4,16 +4,26 @@
 
 (:predicates
     (HAND ?h) ;robot hand
+    (LOCATION ?l)   ;locations (drawers, tables etc)
     (CONTAINER ?c) ;container for coffee
-    (ADDON ?a) ; additional stuff for your coffee
-    (LOCATION ?l)   ;locations
     (POT ?p)    ;pot
     (CUP ?c) ; cup
-
-    (is-free ?h) ; if hand is free
-    (has-spoon ?h) ;if one of the hands holds spoon
+    (ADDON ?a) ; additional stuff for your coffee
 
     
+    ; Hand predicates
+    (is-free ?h) ; if hand is free
+    (has-spoon ?h) ;if one of the hands holds spoon
+    (has-top-pot-part ?h)   ;if hand holds the top part of the pot
+
+    ;Location predicates
+    (is-drawer ?l)  ;drawer identifier
+    (is-closed ?l)  ; if not true -> robot cannot take anything from drawer
+    (is-table ?l) ; table identifier
+    (is-grinder ?l) ;grinder identifier
+    (is-stove ?l)   ; stove id
+
+    ; Container predicates
     (for-water ?c) ;container meant for storing water
     (has-water ?c) ;whether an object has water
     (has-beans ?c) ;whether a container has beans
@@ -22,23 +32,15 @@
     (at ?l ?c) ; represents where the container is
 
     
-    ;Location predicate
-    (is-drawer ?l)
-    (is-closed ?l)
-    (is-table ?l)
-    (is-grinder ?l)
-    (is-stove ?l)
-
-    ;coffee predicates
-    (has-flavor ?c ?a)       
-
     ;pot predicates 
-    (has-coffee ?p)
-    (is-screwed ?p)
-    (has-filter ?p)
-    (coffee-is-ready ?p)
-    (coffee-is-distributed-evenly ?p)
+    (has-coffee ?p) ;whether object has coffee, both as a ground coffee or liquid
+    (is-screwed ?p) ;whether pot is screwed
+    (has-filter ?p) ;if filter is inside the pot
+    (coffee-is-ready ?p)    ;whether coffee as liquid is in the pot
+    (coffee-is-distributed-evenly ?p)   ;Whether cofffee was placed evenly
 
+    ;cup predicates
+    (has-flavor ?c ?a)       ; if coffeee has specified addon eg. sugar, milk -bleh
 )
 
 ; action for drawers
@@ -243,17 +245,31 @@
                        (HAND ?h2) (is-free ?h2)
                        (POT ?p) (at ?h1 ?p) (is-screwed ?p)
                        )
-    :effect (and (not (is-screwed ?p)))
+    :effect (and (not (is-screwed ?p)) (not (is-free ?h2)) (has-top-pot-part ?h2))
+)
+
+(:action put-down-top-part
+    ; Robot puts down the top part of the pot
+    :parameters (?h)
+    :precondition (and (HAND ?h) (not (is-free ?h)) (has-top-pot-part ?h))
+    :effect (and (is-free ?h) (not (has-top-pot-part ?h)))
+)
+
+(:action take-up-top-part
+    ; Robot puts down the top part of the pot
+    :parameters (?h)
+    :precondition (and (HAND ?h) (is-free ?h) (not (has-top-pot-part ?h)))
+    :effect (and (not (is-free ?h)) (has-top-pot-part ?h))
 )
 
 (:action screw-pot
     ;robot removes the top part of the pot and puts it on the table
     :parameters (?h1 ?h2 ?p)
     :precondition (and (HAND ?h1) (not (is-free ?h1))
-                       (HAND ?h2) (is-free ?h2)
+                       (HAND ?h2) (not (is-free ?h2)) (has-top-pot-part ?h2)
                        (POT ?p) (at ?h1 ?p) (not (is-screwed ?p))
                        )
-    :effect (and (is-screwed ?p))
+    :effect (and (is-screwed ?p) (is-free ?h2) (not (has-top-pot-part ?h2)))
 )
 
 (:action remove-filter
@@ -286,6 +302,7 @@
     :effect (and (has-water ?p))
 )
 
+; SPOON Actions
 (:action take-spoon
     ; one hand takes spoon
     :parameters (?h)
@@ -314,7 +331,7 @@
 )
 
 (:action grind-coffee
-    ; robot clicks on container to grind coffee
+    ; robot clicks on container to grind coffee, coffeee goes directly to the container which is at the grinder
     :parameters (?h ?l ?c)
     :precondition (and (HAND ?h) (is-free ?h)
                        (LOCATION ?l) (is-grinder ?l) (has-beans ?l)
@@ -324,6 +341,7 @@
 )
 
 (:action pour-coffee-to-the-pot
+    ; put ground coffee to the pot
     :parameters (?h1 ?h2 ?c ?l ?p)
     :precondition (and (HAND ?h1) (not (is-free ?h1))
                        (HAND ?h2) (has-spoon ?h2)
@@ -335,6 +353,7 @@
 )
 
 (:action distribute-coffee-evenly
+    ; level the coffee as in description
     :parameters (?h1 ?h2 ?p)
     :precondition (and (HAND ?h1) (not (is-free ?h1))
                        (HAND ?h2) (has-spoon ?h2)
@@ -345,6 +364,7 @@
 
 
 (:action ignite-heat
+    ; fire-up the stove
     :parameters (?h ?p ?l)
     :precondition (and (HAND ?h) (is-free ?h)
                        (LOCATION ?l) (is-stove ?l)
@@ -354,6 +374,7 @@
 )
 
 (:action pour-fresh-specialty-to-a-cup
+    ; pour the liquid into a cup
     :parameters (?h ?p ?l ?c)
     :precondition (and (HAND ?h) (not (is-free ?h))
                        (POT ?p) (coffee-is-ready ?p) (is-screwed ?p) (at ?h ?p)
@@ -364,6 +385,7 @@
 )
 
 (:action add-flavor-to-your-coffee
+    ; add sugar/milk to your coffee
     :parameters (?h1 ?h2 ?l ?a ?c)
     :precondition (and (HAND ?h1) (not (is-free ?h1))
                        (HAND ?h2) (has-spoon ?h2)

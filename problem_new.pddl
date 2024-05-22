@@ -30,7 +30,6 @@
     (ADDON sugar)
     (CUP cup)
 
-
     ; robot 
     (is-free left_h)
     (is-free right_h)
@@ -61,15 +60,15 @@
     (is-empty cup)
     (at closet cup)
 
-    
     ;pot
     (at drawer pot)
     (has-filter pot)
-    (is-screwed pot)
-    
-    
+    (is-screwed pot)    
 )
 
+; Idea behind thid goal is to have kind-of-master-chef way of doing that.
+; You finish job, nothing in your hands, your environment is tidied up
+; Main task was to prepare coffee with sugar.
 (:goal (and 
             (has-coffee cup) (has-flavor cup sugar)
             
@@ -77,11 +76,12 @@
             (at drawer beans_jar)
             (at table water_jug)
             (at table sugar)
-            (is-closed drawer)
-            (is-closed closet)
             
             (is-free right_h)
             (is-free left_h)
+            
+            (is-closed drawer)
+            (is-closed closet)
 )
 )
 )
